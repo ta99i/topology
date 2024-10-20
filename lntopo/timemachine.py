@@ -29,7 +29,7 @@ def restore(dataset, timestamp=None, fmt='dot'):
 
     """
     if timestamp is None:
-        timestamp =    time.time()
+        timestamp = time.time()
 
     cutoff = timestamp - 2 * 7 * 24 * 3600
     channels = {}
@@ -84,6 +84,7 @@ def restore(dataset, timestamp=None, fmt='dot'):
             if m.htlc_maximum_msat:
                 chan["htlc_maximum_msat"] = m.htlc_maximum_msat
             chan["cltv_expiry_delta"] = m.cltv_expiry_delta
+            chan["disabled"] = m.disable
         elif isinstance(m, NodeAnnouncement):
             node_id = m.node_id.hex()
 
@@ -123,7 +124,8 @@ def restore(dataset, timestamp=None, fmt='dot'):
     for scid in todelete:
         del channels[scid]
 
-    nodes = [n for n in nodes.values() if n["in_degree"] > 0 or n['out_degree'] > 0]
+    nodes = [n for n in nodes.values() if n["in_degree"] >
+             0 or n['out_degree'] > 0]
 
     if len(channels) == 0:
         print(

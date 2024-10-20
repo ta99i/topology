@@ -80,6 +80,7 @@ class ChannelUpdate(object):
             'fee_base_msat': self.fee_base_msat,
             'fee_proportional_millionths': self.fee_proportional_millionths,
             'htlc_maximum_msat': self.htlc_maximum_msat,
+            'disabled': bool(self.disable),
             'chain_hash': hexlify(self.chain_hash).decode('ASCII'),
         }
 
@@ -95,6 +96,11 @@ class ChannelUpdate(object):
     def direction(self):
         (b,) = struct.unpack("!B", self.channel_flags)
         return b & 0x01
+
+    @property
+    def disable(self):
+        (b,) = struct.unpack("!B", self.channel_flags)
+        return (b >> 1) & 0x01
 
     def serialize(self):
         raise ValueError()
@@ -286,6 +292,8 @@ def parse_address(b):
     return a
 
 # https://github.com/alexbosworth/bolt07/blob/519c94a7837e687bf7478a74779d5ea493a76a44/addresses/encode_base32.js
+
+
 def to_base_32(addr):
     alphabet = 'abcdefghijklmnopqrstuvwxyz234567'
     byte = 8
@@ -305,8 +313,9 @@ def to_base_32(addr):
 
     if bits > 0:
         base32 += alphabet[(value << (word - bits)) & lastIndex]
-    
+
     return base32
+
 
 def parse_node_announcement(b):
     if not isinstance(b, io.BytesIO):
